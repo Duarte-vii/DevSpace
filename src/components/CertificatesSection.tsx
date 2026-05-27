@@ -1,6 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Award, ExternalLink } from "lucide-react";
+import { Award, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
 
 const certificates = [
   {
@@ -40,29 +40,64 @@ const certificates = [
   },
 ];
 
+const CARD_WIDTH = 380 + 24; // md card width + gap
+
 const CertificatesSection = () => {
   const ref = useRef(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  const scroll = (direction: "left" | "right") => {
+    if (!scrollRef.current) return;
+    scrollRef.current.scrollBy({
+      left: direction === "right" ? CARD_WIDTH * 2 : -CARD_WIDTH * 2,
+      behavior: "smooth",
+    });
+  };
 
   return (
     <section id="certificados" className="py-12 lg:py-16 overflow-hidden" ref={ref}>
-      <div className="container mx-auto px-8 lg:px-16 mb-8">
-        <motion.h2
-          initial={{ y: 40, opacity: 0 }}
-          animate={isInView ? { y: 0, opacity: 1 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-4xl md:text-5xl font-light text-foreground mb-4"
+      <div className="container mx-auto px-8 lg:px-16 mb-8 flex items-end justify-between gap-4">
+        <div>
+          <motion.h2
+            initial={{ y: 40, opacity: 0 }}
+            animate={isInView ? { y: 0, opacity: 1 } : {}}
+            transition={{ duration: 0.6 }}
+            className="text-4xl md:text-5xl font-light text-foreground mb-4"
+          >
+            Certificados
+          </motion.h2>
+          <motion.p
+            initial={{ y: 20, opacity: 0 }}
+            animate={isInView ? { y: 0, opacity: 1 } : {}}
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="text-muted-foreground"
+          >
+            Cursos concluídos na Alura. Clique para visualizar.
+          </motion.p>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="flex gap-2 shrink-0"
         >
-          Certificados
-        </motion.h2>
-        <motion.p
-          initial={{ y: 20, opacity: 0 }}
-          animate={isInView ? { y: 0, opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.15 }}
-          className="text-muted-foreground"
-        >
-          Cursos concluídos na Alura. Arraste para o lado para ver mais. Clique para visualizar.
-        </motion.p>
+          <button
+            onClick={() => scroll("left")}
+            aria-label="Anterior"
+            className="w-10 h-10 rounded-lg border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-code-keyword transition-all duration-200 hover:-translate-y-0.5"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => scroll("right")}
+            aria-label="Próximo"
+            className="w-10 h-10 rounded-lg border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-code-keyword transition-all duration-200 hover:-translate-y-0.5"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </motion.div>
       </div>
 
       <div className="relative">
@@ -70,14 +105,20 @@ const CertificatesSection = () => {
         <div className="pointer-events-none absolute inset-y-0 left-0 w-12 md:w-24 bg-gradient-to-r from-background to-transparent z-10" />
         <div className="pointer-events-none absolute inset-y-0 right-0 w-12 md:w-24 bg-gradient-to-l from-background to-transparent z-10" />
 
-        <div className="overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory">
+        <div
+          ref={scrollRef}
+          className="overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory"
+        >
           <div className="flex gap-6 w-max px-8 lg:px-16 py-3">
             {certificates.map((cert, i) => (
-              <a
+              <motion.a
                 key={`${cert.url}-${i}`}
                 href={cert.url}
                 target="_blank"
                 rel="noopener noreferrer"
+                initial={{ y: 40, opacity: 0 }}
+                animate={isInView ? { y: 0, opacity: 1 } : {}}
+                transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
                 className="group relative w-[300px] md:w-[380px] shrink-0 snap-start rounded-xl bg-card border border-border p-6 hover:border-code-keyword transition-all duration-300 hover:-translate-y-1"
               >
                 <div className="flex items-start justify-between mb-6">
@@ -99,7 +140,7 @@ const CertificatesSection = () => {
                     <span>{cert.date}</span>
                   </div>
                 </div>
-              </a>
+              </motion.a>
             ))}
           </div>
         </div>
